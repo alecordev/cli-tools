@@ -1,6 +1,6 @@
 import os
 import sys
-from argparse import ArgumentParser
+import argparse
 
 import tornado.ioloop
 import tornado.web
@@ -34,9 +34,9 @@ def start_server(prefix='', port=8000):
 
 
 def parse_args(args=None):
-    parser = ArgumentParser(description=(
-            'Start a Tornado server to serve static files out of a '
-            'given directory.'))
+    parser = argparse.ArgumentParser(description=(
+        'Start a Tornado server to serve static files out of a '
+        'given directory.'))
     parser.add_argument(
         '-f', '--prefix', type=str, default='',
         help='A prefix to add to the location from which pages are served.')
