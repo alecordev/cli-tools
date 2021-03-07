@@ -17,9 +17,11 @@ def setup_logger():
     """
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('[%(asctime)s] - PID: %(process)d - PNAME: %(processName)s'
-                                  ' - TID: %(thread)d - TNAME: %(threadName)s'
-                                  ' - %(levelname)s - %(filename)s - %(message)s')
+    formatter = logging.Formatter(
+        "[%(asctime)s] - PID: %(process)d - PNAME: %(processName)s"
+        " - TID: %(thread)d - TNAME: %(threadName)s"
+        " - %(levelname)s - %(filename)s - %(message)s"
+    )
     ch = logging.StreamHandler()
     ch.setFormatter(formatter)
     logger.addHandler(ch)
@@ -42,20 +44,20 @@ class SQLConnection(object):
             connection_string: SQLAlchemy connection string
         """
         self.kwargs = kwargs
-        self.dbname = kwargs.get('dbname', 'db')
-        self.connection_string = kwargs.get('connection_string', '')
+        self.dbname = kwargs.get("dbname", "db")
+        self.connection_string = kwargs.get("connection_string", "")
 
     def __enter__(self):
         try:
             if not self.connection_string:
-                self.sql_string = 'sqlite:///{}.db'.format(self.dbname)
+                self.sql_string = "sqlite:///{}.db".format(self.dbname)
             else:
                 # Something like <mysql+mysqlconnector://root:mysql@localhost/dbname> expected
                 self.sql_string = self.connection_string
             self.engine = sqlalchemy.engine.create_engine(self.sql_string)
             self.conn = self.engine.connect()
         except Exception as e:
-            logger.info('Failed to connect using {}'.format(self.sql_string))
+            logger.info("Failed to connect using {}".format(self.sql_string))
             logger.debug(e)
         else:
             return self.conn
@@ -64,7 +66,7 @@ class SQLConnection(object):
         try:
             self.conn.close()
         except Exception as e:
-            logger.info('Closing the established connection failed.')
+            logger.info("Closing the established connection failed.")
             logger.debug(e)
 
 
@@ -81,10 +83,11 @@ def convert_excel_to_sqlite(filename, chunksize=500, **kwargs):
             to_sql_params: dict mapping of pandas.to_sql kwargs
     """
     try:
-        df = pd.read_excel(filename, **kwargs.get('read_excel', {}))
-        with SQLConnection(dbname=kwargs.get('dbname', filename)) as sql:
-            df.to_sql(filename, sql, chunksize=chunksize,
-                      **kwargs.get('to_sql_params', {}))
+        df = pd.read_excel(filename, **kwargs.get("read_excel", {}))
+        with SQLConnection(dbname=kwargs.get("dbname", filename)) as sql:
+            df.to_sql(
+                filename, sql, chunksize=chunksize, **kwargs.get("to_sql_params", {})
+            )
     except Exception as e:
         logger.exception(e)
 
@@ -102,10 +105,11 @@ def convert_csv_to_sqlite(filename, chunksize=500, **kwargs):
             to_sql_params: dict mapping of pandas.to_sql kwargs
     """
     try:
-        df = pd.read_csv(filename, **kwargs.get('read_csv', {}))
-        with SQLConnection(dbname=kwargs.get('dbname', filename)) as sql:
-            df.to_sql(filename, sql, chunksize=chunksize,
-                      **kwargs.get('to_sql_params', {}))
+        df = pd.read_csv(filename, **kwargs.get("read_csv", {}))
+        with SQLConnection(dbname=kwargs.get("dbname", filename)) as sql:
+            df.to_sql(
+                filename, sql, chunksize=chunksize, **kwargs.get("to_sql_params", {})
+            )
     except Exception as e:
         logger.exception(e)
 
@@ -113,13 +117,22 @@ def convert_csv_to_sqlite(filename, chunksize=500, **kwargs):
 def main():
     try:
         parser = argparse.ArgumentParser()
-        parser.add_argument('-f', '--file', help='File to convert to SQL')
+        parser.add_argument("-f", "--file", help="File to convert to SQL")
         parser.add_argument(
-            '-n', '--name', help='SQL database name ("db" by default)', default='db')
+            "-n", "--name", help='SQL database name ("db" by default)', default="db"
+        )
         parser.add_argument(
-            '-c', '--connection', help='SQLAlchemy connection string (default SQLite in current directory)', default='sqlite:///{}.db')
+            "-c",
+            "--connection",
+            help="SQLAlchemy connection string (default SQLite in current directory)",
+            default="sqlite:///{}.db",
+        )
         parser.add_argument(
-            '-k', '--kwargs', help='Uses <eval> to parse and compile the given parameter (it should define a dict)', default='{}')
+            "-k",
+            "--kwargs",
+            help="Uses <eval> to parse and compile the given parameter (it should define a dict)",
+            default="{}",
+        )
         args = parser.parse_args()
 
         logger.debug(vars(args))
@@ -128,25 +141,29 @@ def main():
             sys.exit(1)
 
         if args.kwargs:
-            if not args.kwargs.startswith('{') or not args.kwargs.endswith('}'):
+            if not args.kwargs.startswith("{") or not args.kwargs.endswith("}"):
                 # Expected kwargs example: -k "{'sep':'|', 'skiprows':[0]}"
-                logger.info('Kwargs do not seem safe: {}'.format(args.kwargs))
+                logger.info("Kwargs do not seem safe: {}".format(args.kwargs))
                 sys.exit(1)
 
         if args.file:
-            if args.file.lower().endswith('xlsx'):
-                convert_excel_to_sqlite(filename=args.file,
-                                        connection_string=args.connection,
-                                        dbname=args.dbname,
-                                        **dict(read_excel=eval(args.kwargs)))
-            elif args.file.lower().endswith('csv'):
-                convert_csv_to_sqlite(filename=args.file,
-                                      connection_string=args.connection,
-                                      dbname=args.dbname,
-                                      **dict(read_csv=eval(args.kwargs)))
+            if args.file.lower().endswith("xlsx"):
+                convert_excel_to_sqlite(
+                    filename=args.file,
+                    connection_string=args.connection,
+                    dbname=args.dbname,
+                    **dict(read_excel=eval(args.kwargs))
+                )
+            elif args.file.lower().endswith("csv"):
+                convert_csv_to_sqlite(
+                    filename=args.file,
+                    connection_string=args.connection,
+                    dbname=args.dbname,
+                    **dict(read_csv=eval(args.kwargs))
+                )
     except Exception as e:
         logger.exception(e)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

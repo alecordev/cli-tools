@@ -22,31 +22,31 @@ def directory_tree(path, show_files=True, indentation=4, file_output=False):
 
     if not show_files:
         for root, dirs, files in os.walk(path):
-            level = root.replace(path, '').count(os.sep)
-            indent = ' ' * indentation * (level)
-            tree.append('{}{}/'.format(indent, os.path.basename(root)))
+            level = root.replace(path, "").count(os.sep)
+            indent = " " * indentation * (level)
+            tree.append("{}{}/".format(indent, os.path.basename(root)))
 
     if show_files:
         for root, dirs, files in os.walk(path):
-            level = root.replace(path, '').count(os.sep)
-            indent = ' ' * indentation * (level)
-            tree.append('{}{}/'.format(indent, os.path.basename(root)))
+            level = root.replace(path, "").count(os.sep)
+            indent = " " * indentation * (level)
+            tree.append("{}{}/".format(indent, os.path.basename(root)))
             for f in files:
-                subindent = ' ' * indentation * (level + 1)
-                tree.append('{}{}'.format(subindent, f))
+                subindent = " " * indentation * (level + 1)
+                tree.append("{}{}".format(subindent, f))
 
     if file_output:
-        output_file = open(file_output, 'w')
+        output_file = open(file_output, "w")
         for line in tree:
             output_file.write(line)
-            output_file.write('\n')
+            output_file.write("\n")
     else:
         # Default behaviour: print on screen.
         for line in tree:
             print(line)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         if len(sys.argv) > 1:
             directory_tree(sys.argv[1])
