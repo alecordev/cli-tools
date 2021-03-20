@@ -20,10 +20,7 @@ def setup_app(prefix=""):
         path = "/(.*)"
 
     application = tornado.web.Application(
-        [
-            (path, Handler, {"path": os.getcwd()}),
-        ],
-        debug=True,
+        [(path, Handler, {"path": os.getcwd()}),], debug=True,
     )
 
     return application
